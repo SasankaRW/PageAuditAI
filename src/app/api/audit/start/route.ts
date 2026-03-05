@@ -8,6 +8,7 @@ import {
   setAuditJobStage,
 } from "@/lib/auditJobStore";
 import { generateWebsiteInsights } from "@/lib/ai/generateInsights";
+import { formatAuditError } from "@/lib/errors/formatAuditError";
 import { computeBasicMetrics } from "@/lib/metrics/computeBasicMetrics";
 import { parseHtmlToDom } from "@/lib/scraper/extractDom";
 import { fetchPageHtml } from "@/lib/scraper/fetchPage";
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(successResponse);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to start audit.";
+    const message = formatAuditError(error);
     const errorResponse: AuditJobResponse = { ok: false, error: message };
     return NextResponse.json(errorResponse, { status: 500 });
   }
@@ -61,7 +62,6 @@ async function generateInsightsInBackground(
     const { recommendations, ...analysis } = insights;
     completeAuditJob(jobId, { analysis, recommendations });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "AI analysis failed.";
-    failAuditJob(jobId, message);
+    failAuditJob(jobId, formatAuditError(error));
   }
 }

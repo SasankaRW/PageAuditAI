@@ -2,6 +2,7 @@ import { computeBasicMetrics } from "@/lib/metrics/computeBasicMetrics";
 import { parseHtmlToDom } from "@/lib/scraper/extractDom";
 import { fetchPageHtml } from "@/lib/scraper/fetchPage";
 import { generateWebsiteInsights } from "@/lib/ai/generateInsights";
+import { formatAuditError } from "@/lib/errors/formatAuditError";
 import type { AuditApiSuccessResponse, AuditStreamStage } from "@/types/audit";
 
 type ProgressPayload = {
@@ -65,8 +66,7 @@ export async function GET(request: Request) {
 
         sendEvent("result", result);
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Audit stream failed.";
-        sendEvent("failed", { error: message } satisfies FailedPayload);
+        sendEvent("failed", { error: formatAuditError(error) } satisfies FailedPayload);
       } finally {
         controller.close();
       }

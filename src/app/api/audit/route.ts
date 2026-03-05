@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { generateWebsiteInsights } from "@/lib/ai/generateInsights";
+import { formatAuditError } from "@/lib/errors/formatAuditError";
 import { computeBasicMetrics } from "@/lib/metrics/computeBasicMetrics";
 import { scrapePageDom } from "@/lib/scraper/extractDom";
 import type {
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(response);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unexpected scrape error.";
+    const message = formatAuditError(error);
     const response: AuditApiErrorResponse = { ok: false, error: message };
 
     return NextResponse.json(response, { status: 500 });
